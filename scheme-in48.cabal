@@ -34,6 +34,7 @@ executable scheme-in48
         Evaluator.BinaryOperation.Ord
         Evaluator.ListOperation
         Evaluator.Unpacker
+        Evaluator.Repl
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions

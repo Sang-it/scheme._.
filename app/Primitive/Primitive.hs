@@ -19,3 +19,4 @@ instance Show Primitive where
   show (Bool False) = "#f"
   show (List xs) = "(" ++ unwords (map show xs) ++ ")"
   show (DottedList xs x) = "(" ++ unwords (map show xs) ++ " . " ++ show x ++ ")"
+

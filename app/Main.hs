@@ -1,21 +1,14 @@
 module Main where
 
-import Control.Applicative
-import Control.Monad.Except
 import Evaluator.Eval
-import Parser.ParseExpression
-import Primitive.Primitive
+import Evaluator.Repl
 import Primitive.PrimitiveError
 import System.Environment
-import qualified Text.ParserCombinators.Parsec as P
-
-readExpr :: String -> ThrowsError Primitive
-readExpr input = case P.parse parseExpression "lisp" input of
-  Left err -> throwError $ Parser err
-  Right val -> return val
 
 main :: IO ()
 main = do
   args <- getArgs
-  let evaled = fmap show $ readExpr (head args) >>= eval
-  putStrLn $ extractValue $ trapError evaled
+  case length args of
+    0 -> runRepl
+    1 -> evalAndPrint $ head args
+    _ -> putStrLn "Program takes only 0 or 1 argument"

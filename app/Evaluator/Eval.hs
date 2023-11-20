@@ -1,7 +1,6 @@
 module Evaluator.Eval (eval) where
 
 import Control.Monad.Except
-import Data.Functor
 import Evaluator.BinaryOperation.Numberic
 import Evaluator.BinaryOperation.Ord
 import Evaluator.ListOperation
