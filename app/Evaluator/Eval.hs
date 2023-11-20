@@ -4,6 +4,7 @@ import Control.Monad.Except
 import Data.Functor
 import Evaluator.BinaryOperation.Numberic
 import Evaluator.BinaryOperation.Ord
+import Evaluator.ListOperation
 import Primitive.Primitive
 import Primitive.PrimitiveError
 
@@ -28,7 +29,13 @@ primitives =
     ("string<?", strOrdBinOp (<)),
     ("string>?", strOrdBinOp (>)),
     ("string<=?", strOrdBinOp (<=)),
-    ("string>=?", strOrdBinOp (>=))
+    ("string>=?", strOrdBinOp (>=)),
+    ("car", car),
+    ("cdr", cdr),
+    ("cons", cons),
+    ("eq?", eqv),
+    ("eqv?", eqv),
+    ("equal?", equal)
   ]
 
 apply :: String -> [Primitive] -> ThrowsError Primitive

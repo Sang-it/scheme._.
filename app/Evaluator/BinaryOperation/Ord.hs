@@ -1,7 +1,7 @@
 module Evaluator.BinaryOperation.Ord (numOrdBinOp, strOrdBinOp, boolOrdBinOp) where
 
 import Control.Monad.Except
-import Evaluator.BinaryOperation.Numberic (unpackNum)
+import Evaluator.Unpacker (unpackBoolean, unpackNum, unpackString)
 import Primitive.Primitive
 import Primitive.PrimitiveError
 
@@ -13,16 +13,6 @@ boolBinOp unpacker op args =
       left <- unpacker $ head args
       right <- unpacker $ args !! 1
       return $ Bool $ left `op` right
-
-unpackBoolean :: Primitive -> ThrowsError Bool
-unpackBoolean (Bool b) = return b
-unpackBoolean notABoolean = throwError $ TypeMismatch "boolean" notABoolean
-
-unpackString :: Primitive -> ThrowsError String
-unpackString (String s) = return s
-unpackString (Number s) = return $ show s
-unpackString (Bool s) = return $ show s
-unpackString notAString = throwError $ TypeMismatch "string" notAString
 
 numOrdBinOp :: (Integer -> Integer -> Bool) -> [Primitive] -> ThrowsError Primitive
 numOrdBinOp = boolBinOp unpackNum
