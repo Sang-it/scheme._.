@@ -21,6 +21,6 @@ Using cabal run with no arguments will just run the REPL.
 
 Or
 ```
-cabal build
+cabal install --installdir=.
 ```
 And just use the executable.
