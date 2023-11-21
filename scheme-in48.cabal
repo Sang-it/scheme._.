@@ -35,6 +35,7 @@ executable scheme-in48
         Evaluator.ListOperation
         Evaluator.Unpacker
         Evaluator.Repl
+        Evaluator.Environment
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions
