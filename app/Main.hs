@@ -6,9 +6,7 @@ import Primitive.PrimitiveError
 import System.Environment
 
 main :: IO ()
-main = do
-  args <- getArgs
-  case length args of
-    0 -> runRepl
-    1 -> runOne $ head args
-    _ -> putStrLn "Program takes only 0 or 1 argument"
+main =
+  do
+    args <- getArgs
+    if null args then runRepl else runOne args

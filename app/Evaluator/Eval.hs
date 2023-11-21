@@ -1,12 +1,15 @@
-module Evaluator.Eval (eval, primitiveBindings) where
+module Evaluator.Eval where
 
 import Control.Monad.Except
 import Data.Maybe
 import Evaluator.BinaryOperation.Numberic
 import Evaluator.BinaryOperation.Ord
 import Evaluator.Environment
+import Evaluator.InputOutputOperation
 import Evaluator.ListOperation
+import Evaluator.Reader
 import Internal
+import System.IO
 
 primitives :: [(String, [Primitive] -> ThrowsError Primitive)]
 primitives =
@@ -38,6 +41,19 @@ primitives =
     ("equal?", equal)
   ]
 
+ioPrimitives :: [(String, [Primitive] -> IOThrowsError Primitive)]
+ioPrimitives =
+  [ ("apply", applyProc),
+    ("open-input-file", makePort ReadMode),
+    ("open-output-file", makePort WriteMode),
+    ("close-input-port", closePort),
+    ("close-output-port", closePort),
+    ("read", readProc),
+    ("write", writeProc),
+    ("read-contents", readContents),
+    ("read-all", readAll)
+  ]
+
 apply :: Primitive -> [Primitive] -> IOThrowsError Primitive
 apply (PrimitiveFunc func) args = liftThrows $ func args
 apply (Func params varargs body closure) args =
@@ -52,16 +68,25 @@ apply (Func params varargs body closure) args =
       case arg of
         Just argName -> liftIO $ bindVars env [(argName, List remainingArgs)]
         Nothing -> return env
+apply (IOFunc func) args = func args
+
+applyProc :: [Primitive] -> IOThrowsError Primitive
+applyProc [func, List args] = apply func args
+applyProc (func : args) = apply func args
 
 primitiveBindings :: IO Env
-primitiveBindings = nullEnv >>= flip bindVars (map makePrimitiveFunc primitives)
+primitiveBindings =
+  nullEnv
+    >>= flip bindVars (map (makeFunc IOFunc) ioPrimitives ++ map (makeFunc PrimitiveFunc) primitives)
   where
-    makePrimitiveFunc (var, func) = (var, PrimitiveFunc func)
+    makeFunc constructor (var, func) = (var, constructor func)
 
 makeFunc varargs env params body = return $ Func (map show params) varargs body env
 
+makeNormalFunc :: Env -> [Primitive] -> [Primitive] -> ExceptT PrimitiveError IO Primitive
 makeNormalFunc = makeFunc Nothing
 
+makeVarargs :: Primitive -> Env -> [Primitive] -> [Primitive] -> ExceptT PrimitiveError IO Primitive
 makeVarargs = makeFunc . Just . show
 
 eval :: Env -> Primitive -> IOThrowsError Primitive
@@ -69,6 +94,7 @@ eval env val@(String _) = return val
 eval env val@(Number _) = return val
 eval env val@(Bool _) = return val
 eval env (Atom id) = getVar env id
+eval env (List [Atom "load", String filename]) = load filename >>= fmap last . mapM (eval env)
 eval env (List [Atom "quote", val]) = return val
 eval env (List [Atom "if", pred, conseq, alt]) = do
   result <- eval env pred
@@ -87,3 +113,9 @@ eval env (List (function : args)) = do
   argVals <- mapM (eval env) args
   apply func argVals
 eval env badForm = throwError $ BadSpecialForm "Unrecognized special form: " badForm
+
+evalString :: Env -> String -> IO String
+evalString env expr = runIOThrows $ fmap show $ liftThrows (readExpr expr) >>= eval env
+
+evalAndPrint :: Env -> String -> IO ()
+evalAndPrint env expr = evalString env expr >>= putStrLn

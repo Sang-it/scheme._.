@@ -10,8 +10,6 @@ import Primitive.PrimitiveError
 nullEnv :: IO Env
 nullEnv = newIORef []
 
-type IOThrowsError = ExceptT PrimitiveError IO
-
 liftThrows :: ThrowsError a -> IOThrowsError a
 liftThrows (Left err) = throwError err
 liftThrows (Right val) = return val
@@ -49,7 +47,6 @@ defineVar envRef var value = do
       env <- readIORef envRef
       writeIORef envRef ((var, valueRef) : env)
       return value
-
 
 bindVars :: Env -> [(String, Primitive)] -> IO Env
 bindVars envRef bindings = readIORef envRef >>= extendEnv bindings >>= newIORef

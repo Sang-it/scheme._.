@@ -15,3 +15,5 @@ instance Show Primitive where
   show (PrimitiveFunc _) = "<primitive>"
   show (Func {params = args, vararg = varargs, body = _, closure = _}) =
     "(lambda (" ++ unwords (map show args) ++ (case varargs of Nothing -> ""; Just arg -> " . " ++ arg) ++ ") ...)"
+  show (IOFunc _) = "<IO primitive>"
+  show (Port _) = "<IO port>"
