@@ -2,8 +2,7 @@ module Evaluator.ListOperation where
 
 import Control.Monad.Except
 import Evaluator.Unpacker
-import Primitive.Primitive
-import Primitive.PrimitiveError
+import Internal
 
 car :: [Primitive] -> ThrowsError Primitive
 car [List (x : _)] = return x

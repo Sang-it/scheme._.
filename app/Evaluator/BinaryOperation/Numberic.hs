@@ -3,8 +3,7 @@ module Evaluator.BinaryOperation.Numberic (numericBinOp) where
 import Control.Monad.Except
 import Data.Functor
 import Evaluator.Unpacker (unpackNum)
-import Primitive.Primitive
-import Primitive.PrimitiveError
+import Internal
 
 numericBinOp :: (Integer -> Integer -> Integer) -> [Primitive] -> ThrowsError Primitive
 numericBinOp op [] = throwError $ NumArgs 2 []

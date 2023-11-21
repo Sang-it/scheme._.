@@ -4,10 +4,8 @@ import Control.Monad.Except
 import Data.Functor ((<&>))
 import Data.IORef
 import Data.Maybe
-import Primitive.Primitive
+import Internal
 import Primitive.PrimitiveError
-
-type Env = IORef [(String, IORef Primitive)]
 
 nullEnv :: IO Env
 nullEnv = newIORef []
@@ -51,6 +49,7 @@ defineVar envRef var value = do
       env <- readIORef envRef
       writeIORef envRef ((var, valueRef) : env)
       return value
+
 
 bindVars :: Env -> [(String, Primitive)] -> IO Env
 bindVars envRef bindings = readIORef envRef >>= extendEnv bindings >>= newIORef

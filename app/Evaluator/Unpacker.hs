@@ -3,8 +3,7 @@
 module Evaluator.Unpacker where
 
 import Control.Monad.Except
-import Primitive.Primitive
-import Primitive.PrimitiveError
+import Internal
 
 data Unpacker = forall a. (Eq a) => AnyUnpacker (Primitive -> ThrowsError a)
 

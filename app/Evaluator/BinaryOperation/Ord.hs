@@ -2,8 +2,7 @@ module Evaluator.BinaryOperation.Ord (numOrdBinOp, strOrdBinOp, boolOrdBinOp) wh
 
 import Control.Monad.Except
 import Evaluator.Unpacker (unpackBoolean, unpackNum, unpackString)
-import Primitive.Primitive
-import Primitive.PrimitiveError
+import Internal
 
 boolBinOp :: (Primitive -> ThrowsError a) -> (a -> a -> Bool) -> [Primitive] -> ThrowsError Primitive
 boolBinOp unpacker op args =

@@ -1,7 +1,7 @@
 module Parser.ParseExpression (parseExpression) where
 
 import Control.Applicative ((<|>))
-import Primitive.Primitive
+import Internal
 import qualified Text.ParserCombinators.Parsec as P
 
 symbol :: P.Parser Char
