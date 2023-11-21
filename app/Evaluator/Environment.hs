@@ -1,17 +1,19 @@
 module Evaluator.Environment where
 
-import Control.Monad.Except
-import Data.Functor ((<&>))
-import Data.IORef
-import Data.Maybe
-import Internal
-import Primitive.PrimitiveError
+import           Control.Monad.Except (MonadError (throwError),
+                                       MonadIO (liftIO), runExceptT)
+import           Data.Functor         ((<&>))
+import           Data.IORef           (newIORef, readIORef, writeIORef)
+import           Data.Maybe           (isJust)
+import           Internal             (Env, IOThrowsError, Primitive,
+                                       PrimitiveError (UnboundVar), ThrowsError)
+import           Primitive            (extractValue, trapError)
 
 nullEnv :: IO Env
 nullEnv = newIORef []
 
 liftThrows :: ThrowsError a -> IOThrowsError a
-liftThrows (Left err) = throwError err
+liftThrows (Left err)  = throwError err
 liftThrows (Right val) = return val
 
 runIOThrows :: IOThrowsError String -> IO String

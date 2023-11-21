@@ -1,14 +1,10 @@
 module Evaluator.Repl where
 
-import Control.Monad.Except
-import Evaluator.Environment
-import Evaluator.Eval
-import Evaluator.Reader
-import Internal
-import Parser.ParseExpression
-import System.Environment
-import System.IO
-import qualified Text.ParserCombinators.Parsec as P
+import           Evaluator.Environment (bindVars, runIOThrows)
+import           Evaluator.Eval        (eval, evalAndPrint, primitiveBindings)
+import           Evaluator.Reader      (readPrompt)
+import           Internal              (Primitive (Atom, List, String))
+import           System.IO             (hPutStrLn, stderr)
 
 until_ :: (Monad m) => (a -> Bool) -> m a -> (a -> m ()) -> m ()
 until_ pred prompt action = do

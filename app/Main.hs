@@ -1,9 +1,7 @@
 module Main where
 
-import Evaluator.Eval
-import Evaluator.Repl
-import Primitive.PrimitiveError
-import System.Environment
+import           Evaluator.Repl     (runOne, runRepl)
+import           System.Environment (getArgs)
 
 main :: IO ()
 main =

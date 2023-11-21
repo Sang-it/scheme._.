@@ -2,8 +2,10 @@
 
 module Evaluator.Unpacker where
 
-import Control.Monad.Except
-import Internal
+import           Control.Monad.Except (MonadError (catchError, throwError))
+import           Internal             (Primitive (Bool, List, Number, String),
+                                       PrimitiveError (TypeMismatch),
+                                       ThrowsError)
 
 data Unpacker = forall a. (Eq a) => AnyUnpacker (Primitive -> ThrowsError a)
 
@@ -16,13 +18,13 @@ unpackEquals arg1 arg2 (AnyUnpacker unpacker) =
     `catchError` const (return False)
 
 unpackBoolean :: Primitive -> ThrowsError Bool
-unpackBoolean (Bool b) = return b
+unpackBoolean (Bool b)    = return b
 unpackBoolean notABoolean = throwError $ TypeMismatch "boolean" notABoolean
 
 unpackString :: Primitive -> ThrowsError String
 unpackString (String s) = return s
 unpackString (Number s) = return $ show s
-unpackString (Bool s) = return $ show s
+unpackString (Bool s)   = return $ show s
 unpackString notAString = throwError $ TypeMismatch "string" notAString
 
 unpackNum :: Primitive -> ThrowsError Integer

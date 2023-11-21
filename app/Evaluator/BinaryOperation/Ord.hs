@@ -1,8 +1,9 @@
-module Evaluator.BinaryOperation.Ord (numOrdBinOp, strOrdBinOp, boolOrdBinOp) where
+module Evaluator.BinaryOperation.Ord  where
 
-import Control.Monad.Except
-import Evaluator.Unpacker (unpackBoolean, unpackNum, unpackString)
-import Internal
+import           Control.Monad.Except (MonadError (throwError))
+import           Evaluator.Unpacker   (unpackBoolean, unpackNum, unpackString)
+import           Internal             (Primitive (Bool),
+                                       PrimitiveError (NumArgs), ThrowsError)
 
 boolBinOp :: (Primitive -> ThrowsError a) -> (a -> a -> Bool) -> [Primitive] -> ThrowsError Primitive
 boolBinOp unpacker op args =

@@ -3,10 +3,10 @@
 -- TODO: Maybe create a .hs-boot file to resolve the cyclic dependency in the future.
 module Internal where
 
-import Control.Monad.Except
-import Data.IORef
-import System.IO
-import qualified Text.ParserCombinators.Parsec as P
+import           Control.Monad.Except          (ExceptT)
+import           Data.IORef                    (IORef)
+import           System.IO                     (Handle)
+import           Text.ParserCombinators.Parsec (ParseError)
 
 data Primitive
   = Atom String
@@ -17,9 +17,9 @@ data Primitive
   | Bool Bool
   | PrimitiveFunc ([Primitive] -> ThrowsError Primitive)
   | Func
-      { params :: [String],
-        vararg :: Maybe String,
-        body :: [Primitive],
+      { params  :: [String],
+        vararg  :: Maybe String,
+        body    :: [Primitive],
         closure :: Env
       }
   | IOFunc ([Primitive] -> IOThrowsError Primitive)
@@ -28,7 +28,7 @@ data Primitive
 data PrimitiveError
   = NumArgs Integer [Primitive]
   | TypeMismatch String Primitive
-  | Parser P.ParseError
+  | Parser ParseError
   | BadSpecialForm String Primitive
   | NotFunction String String
   | UnboundVar String String

@@ -1,7 +1,7 @@
-module Parser.ParseExpression (parseExpression) where
+module Parser  where
 
-import Control.Applicative ((<|>))
-import Internal
+import           Control.Applicative           ((<|>))
+import           Internal                      (Primitive (Atom, Bool, DottedList, List, Number, String))
 import qualified Text.ParserCombinators.Parsec as P
 
 symbol :: P.Parser Char
@@ -26,7 +26,7 @@ parseAtom = do
     case atom of
       "#t" -> Bool True
       "#f" -> Bool False
-      _ -> Atom atom
+      _    -> Atom atom
 
 parseNumber :: P.Parser Primitive
 parseNumber = Number . read <$> P.many1 P.digit

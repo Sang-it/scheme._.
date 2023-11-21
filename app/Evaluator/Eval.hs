@@ -1,15 +1,26 @@
 module Evaluator.Eval where
 
-import Control.Monad.Except
-import Data.Maybe
-import Evaluator.BinaryOperation.Numberic
-import Evaluator.BinaryOperation.Ord
-import Evaluator.Environment
-import Evaluator.InputOutputOperation
-import Evaluator.ListOperation
-import Evaluator.Reader
-import Internal
-import System.IO
+import           Control.Monad.Except               (ExceptT,
+                                                     MonadError (throwError),
+                                                     MonadIO (liftIO))
+import           Data.Maybe                         (isNothing)
+import           Evaluator.BinaryOperation.Numberic (numericBinOp)
+import           Evaluator.BinaryOperation.Ord      (boolOrdBinOp, numOrdBinOp,
+                                                     strOrdBinOp)
+import           Evaluator.Environment              (bindVars, defineVar,
+                                                     getVar, liftThrows,
+                                                     nullEnv, runIOThrows,
+                                                     setVar)
+import           Evaluator.InputOutputOperation     (closePort, load, makePort,
+                                                     readAll, readContents,
+                                                     readProc, writeProc)
+import           Evaluator.ListOperation            (car, cdr, cons, equal, eqv)
+import           Evaluator.Reader                   (readExpr)
+import           Internal                           (Env, IOThrowsError,
+                                                     Primitive (Atom, Bool, DottedList, Func, IOFunc, List, Number, PrimitiveFunc, String),
+                                                     PrimitiveError (BadSpecialForm, NumArgs),
+                                                     ThrowsError)
+import           System.IO                          (IOMode (ReadMode, WriteMode))
 
 primitives :: [(String, [Primitive] -> ThrowsError Primitive)]
 primitives =
@@ -67,12 +78,12 @@ apply (Func params varargs body closure) args =
     bindVarArgs arg env =
       case arg of
         Just argName -> liftIO $ bindVars env [(argName, List remainingArgs)]
-        Nothing -> return env
+        Nothing      -> return env
 apply (IOFunc func) args = func args
 
 applyProc :: [Primitive] -> IOThrowsError Primitive
 applyProc [func, List args] = apply func args
-applyProc (func : args) = apply func args
+applyProc (func : args)     = apply func args
 
 primitiveBindings :: IO Env
 primitiveBindings =
@@ -81,6 +92,7 @@ primitiveBindings =
   where
     makeFunc constructor (var, func) = (var, constructor func)
 
+makeFunc :: (Monad m, Show a) => Maybe String -> Env -> [a] -> [Primitive] -> m Primitive
 makeFunc varargs env params body = return $ Func (map show params) varargs body env
 
 makeNormalFunc :: Env -> [Primitive] -> [Primitive] -> ExceptT PrimitiveError IO Primitive
@@ -100,7 +112,7 @@ eval env (List [Atom "if", pred, conseq, alt]) = do
   result <- eval env pred
   case result of
     Bool False -> eval env alt
-    _ -> eval env conseq
+    _          -> eval env conseq
 eval env (List [Atom "set!", Atom var, form]) = eval env form >>= setVar env var
 eval env (List [Atom "define", Atom var, form]) = eval env form >>= defineVar env var
 eval env (List (Atom "define" : List (Atom var : params) : body)) = makeNormalFunc env params body >>= defineVar env var

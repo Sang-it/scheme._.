@@ -1,10 +1,15 @@
 module Evaluator.Reader where
 
 import Control.Monad.Except
-import Internal
-import Parser.ParseExpression
-import System.IO
+import Internal (Primitive, PrimitiveError (Parser), ThrowsError)
+import Parser (parseExpression)
+import System.IO (hFlush, stdout)
 import Text.ParserCombinators.Parsec as P
+  ( Parser,
+    endBy,
+    parse,
+    spaces,
+  )
 
 readExpr :: String -> ThrowsError Primitive
 readExpr = readOrThrow parseExpression
