@@ -10,7 +10,7 @@ Prerequisites:
 How to Run:
 
 ```
-cabal run [filename]
+cabal run [projectname] [filename]
 ```
 This will take a filename as argument and interpret it.
 
