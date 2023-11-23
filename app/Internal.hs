@@ -3,7 +3,7 @@
 -- TODO: Maybe create a .hs-boot file to resolve the cyclic dependency in the future.
 module Internal where
 
-import           Control.Monad.Except          (ExceptT)
+import           Control.Monad.Except          (ExceptT, throwError)
 import           Data.IORef                    (IORef)
 import           System.IO                     (Handle)
 import           Text.ParserCombinators.Parsec (ParseError)
@@ -14,6 +14,7 @@ data Primitive
   | DottedList [Primitive] Primitive
   | Number Integer
   | String String
+  | Comment String
   | Bool Bool
   | PrimitiveFunc ([Primitive] -> ThrowsError Primitive)
   | Func
@@ -39,3 +40,5 @@ type Env = IORef [(String, IORef Primitive)]
 type ThrowsError = Either PrimitiveError
 
 type IOThrowsError = ExceptT PrimitiveError IO
+
+

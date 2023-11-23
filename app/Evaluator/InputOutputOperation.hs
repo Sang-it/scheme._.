@@ -15,9 +15,8 @@ closePort :: [Primitive] -> IOThrowsError Primitive
 closePort [Port port] = liftIO $ hClose port >> return (Bool True)
 closePort _           = return $ Bool False
 
-readProc :: [Primitive] -> IOThrowsError Primitive
-readProc []          = readProc [Port stdin]
-readProc [Port port] = liftIO (hGetLine port) >>= liftThrows . readExpr
+readProc  []          = readProc [Port stdin]
+readProc  [Port port] = liftIO (hGetLine port) >>= liftThrows . readExpr
 
 writeProc :: [Primitive] -> IOThrowsError Primitive
 writeProc [obj]            = writeProc [obj, Port stdout]

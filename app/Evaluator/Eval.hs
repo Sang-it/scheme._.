@@ -1,49 +1,53 @@
 module Evaluator.Eval where
 
-import           Control.Monad.Except               (ExceptT,
-                                                     MonadError (throwError),
-                                                     MonadIO (liftIO))
-import           Data.Maybe                         (isNothing)
-import           Evaluator.BinaryOperation.Numberic (numericBinOp)
-import           Evaluator.BinaryOperation.Ord      (boolOrdBinOp, numOrdBinOp,
-                                                     strOrdBinOp)
-import           Evaluator.Environment              (bindVars, defineVar,
-                                                     getVar, liftThrows,
-                                                     nullEnv, runIOThrows,
-                                                     setVar)
-import           Evaluator.InputOutputOperation     (closePort, load, makePort,
-                                                     readAll, readContents,
-                                                     readProc, writeProc)
-import           Evaluator.ListOperation            (car, cdr, cons, equal, eqv)
-import           Evaluator.Reader                   (readExpr)
-import           Internal                           (Env, IOThrowsError,
-                                                     Primitive (Atom, Bool, DottedList, Func, IOFunc, List, Number, PrimitiveFunc, String),
-                                                     PrimitiveError (BadSpecialForm, NumArgs),
-                                                     ThrowsError)
-import           System.IO                          (IOMode (ReadMode, WriteMode))
+import           Control.Monad.Except           (ExceptT,
+                                                 MonadError (throwError),
+                                                 MonadIO (liftIO))
+import           Data.Maybe                     (isNothing)
+import           Evaluator.BinaryOperation      (logicalBinOp, numOrdBinOp,
+                                                 numericBinOp, strOrdBinOp)
+import           Evaluator.Environment          (bindVars, defineVar, getVar,
+                                                 liftThrows, makeNormalFunc,
+                                                 makeVarargs, nullEnv,
+                                                 runIOThrows, setVar)
+import           Evaluator.InputOutputOperation (closePort, load, makePort,
+                                                 readAll, readContents,
+                                                 readProc, writeProc)
+import           Evaluator.ListOperation        (car, cdr, cons, equal, eqv)
+import           Evaluator.Reader               (readExpr)
+import           Internal                       (Env, IOThrowsError,
+                                                 Primitive (Atom, Bool, DottedList, Func, IOFunc, List, Number, PrimitiveFunc, String),
+                                                 PrimitiveError (BadSpecialForm, NumArgs),
+                                                 ThrowsError)
+import           System.IO                      (IOMode (ReadMode, WriteMode))
 
 primitives :: [(String, [Primitive] -> ThrowsError Primitive)]
 primitives =
-  [ ("+", numericBinOp (+)),
+  [ -- Numeric operations
+    ("+", numericBinOp (+)),
     ("-", numericBinOp (-)),
     ("*", numericBinOp (*)),
     ("/", numericBinOp div),
     ("mod", numericBinOp mod),
     ("quotient", numericBinOp quot),
     ("remainder", numericBinOp rem),
+    -- Numeric order operations
     ("=", numOrdBinOp (==)),
     ("<", numOrdBinOp (<)),
     (">", numOrdBinOp (>)),
     ("/=", numOrdBinOp (/=)),
     (">=", numOrdBinOp (>=)),
     ("<=", numOrdBinOp (<=)),
-    ("&&", boolOrdBinOp (&&)),
-    ("||", boolOrdBinOp (||)),
+    -- String order operations
     ("string=?", strOrdBinOp (==)),
     ("string<?", strOrdBinOp (<)),
     ("string>?", strOrdBinOp (>)),
     ("string<=?", strOrdBinOp (<=)),
     ("string>=?", strOrdBinOp (>=)),
+    -- Logical operations
+    ("&&", logicalBinOp (&&)),
+    ("||", logicalBinOp (||)),
+    -- List operations
     ("car", car),
     ("cdr", cdr),
     ("cons", cons),
@@ -84,22 +88,6 @@ apply (IOFunc func) args = func args
 applyProc :: [Primitive] -> IOThrowsError Primitive
 applyProc [func, List args] = apply func args
 applyProc (func : args)     = apply func args
-
-primitiveBindings :: IO Env
-primitiveBindings =
-  nullEnv
-    >>= flip bindVars (map (makeFunc IOFunc) ioPrimitives ++ map (makeFunc PrimitiveFunc) primitives)
-  where
-    makeFunc constructor (var, func) = (var, constructor func)
-
-makeFunc :: (Monad m, Show a) => Maybe String -> Env -> [a] -> [Primitive] -> m Primitive
-makeFunc varargs env params body = return $ Func (map show params) varargs body env
-
-makeNormalFunc :: Env -> [Primitive] -> [Primitive] -> ExceptT PrimitiveError IO Primitive
-makeNormalFunc = makeFunc Nothing
-
-makeVarargs :: Primitive -> Env -> [Primitive] -> [Primitive] -> ExceptT PrimitiveError IO Primitive
-makeVarargs = makeFunc . Just . show
 
 eval :: Env -> Primitive -> IOThrowsError Primitive
 eval env val@(String _) = return val

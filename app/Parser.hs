@@ -48,7 +48,7 @@ parseQuoted = do
 
 parseExpression :: P.Parser Primitive
 parseExpression =
-  parseAtom
+ parseAtom
     <|> parseString
     <|> parseNumber
     <|> parseQuoted
@@ -57,3 +57,4 @@ parseExpression =
       x <- P.try parseList <|> parseDottedList
       P.char ')'
       return x
+

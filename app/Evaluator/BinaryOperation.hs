@@ -1,9 +1,15 @@
-module Evaluator.BinaryOperation.Ord  where
+module Evaluator.BinaryOperation where
 
 import           Control.Monad.Except (MonadError (throwError))
+import           Data.Functor         ((<&>))
 import           Evaluator.Unpacker   (unpackBoolean, unpackNum, unpackString)
-import           Internal             (Primitive (Bool),
+import           Internal             (Primitive (Bool, Number),
                                        PrimitiveError (NumArgs), ThrowsError)
+
+numericBinOp :: (Integer -> Integer -> Integer) -> [Primitive] -> ThrowsError Primitive
+numericBinOp op []      = throwError $ NumArgs 2 []
+numericBinOp op val@[_] = throwError $ NumArgs 2 val
+numericBinOp op params  = mapM unpackNum params <&> (Number . foldl1 op)
 
 boolBinOp :: (Primitive -> ThrowsError a) -> (a -> a -> Bool) -> [Primitive] -> ThrowsError Primitive
 boolBinOp unpacker op args =
@@ -20,5 +26,5 @@ numOrdBinOp = boolBinOp unpackNum
 strOrdBinOp :: (String -> String -> Bool) -> [Primitive] -> ThrowsError Primitive
 strOrdBinOp = boolBinOp unpackString
 
-boolOrdBinOp :: (Bool -> Bool -> Bool) -> [Primitive] -> ThrowsError Primitive
-boolOrdBinOp = boolBinOp unpackBoolean
+logicalBinOp :: (Bool -> Bool -> Bool) -> [Primitive] -> ThrowsError Primitive
+logicalBinOp = boolBinOp unpackBoolean
