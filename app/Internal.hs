@@ -3,37 +3,37 @@
 -- TODO: Maybe create a .hs-boot file to resolve the cyclic dependency in the future.
 module Internal where
 
-import           Control.Monad.Except          (ExceptT, throwError)
-import           Data.IORef                    (IORef)
-import           System.IO                     (Handle)
-import           Text.ParserCombinators.Parsec (ParseError)
+import Control.Monad.Except (ExceptT, throwError)
+import Data.IORef (IORef)
+import System.IO (Handle)
+import Text.ParserCombinators.Parsec (ParseError)
 
 data Primitive
-  = Atom String
-  | List [Primitive]
-  | DottedList [Primitive] Primitive
-  | Number Integer
-  | String String
-  | Comment String
-  | Bool Bool
-  | PrimitiveFunc ([Primitive] -> ThrowsError Primitive)
-  | Func
-      { params  :: [String],
-        vararg  :: Maybe String,
-        body    :: [Primitive],
-        closure :: Env
-      }
-  | IOFunc ([Primitive] -> IOThrowsError Primitive)
-  | Port Handle
+    = Atom String
+    | List [Primitive]
+    | DottedList [Primitive] Primitive
+    | Number Integer
+    | String String
+    | Comment String
+    | Bool Bool
+    | PrimitiveFunc ([Primitive] -> ThrowsError Primitive)
+    | Func
+        { params :: [String]
+        , vararg :: Maybe String
+        , body :: [Primitive]
+        , closure :: Env
+        }
+    | IOFunc ([Primitive] -> IOThrowsError Primitive)
+    | Port Handle
 
 data PrimitiveError
-  = NumArgs Integer [Primitive]
-  | TypeMismatch String Primitive
-  | Parser ParseError
-  | BadSpecialForm String Primitive
-  | NotFunction String String
-  | UnboundVar String String
-  | Default String
+    = NumArgs Integer [Primitive]
+    | TypeMismatch String Primitive
+    | Parser ParseError
+    | BadSpecialForm String Primitive
+    | NotFunction String String
+    | UnboundVar String String
+    | Default String
 
 type Env = IORef [(String, IORef Primitive)]
 
