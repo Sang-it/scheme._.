@@ -1,2 +1,4 @@
-(filter even? '(1 2 3 4 5 6 7 8 9 10))
+(define x 10)
+(define (add x y) (+ x y))
+(add x 2)
 

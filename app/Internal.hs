@@ -40,5 +40,3 @@ type Env = IORef [(String, IORef Primitive)]
 type ThrowsError = Either PrimitiveError
 
 type IOThrowsError = ExceptT PrimitiveError IO
-
-
