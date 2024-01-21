@@ -2,6 +2,7 @@ module Parser where
 
 import Control.Applicative ((<|>))
 import Internal (Primitive (Atom, Bool, DottedList, List, Number, String))
+import qualified Text.Parsec.Char as C
 import qualified Text.ParserCombinators.Parsec as P
 
 symbol :: P.Parser Char
@@ -22,8 +23,8 @@ parseAtom = do
     first <- P.letter <|> symbol
     rest <- P.many $ P.letter <|> P.digit <|> symbol
     let atom = first : rest
-    return $
-        case atom of
+    return
+        $ case atom of
             "#t" -> Bool True
             "#f" -> Bool False
             _ -> Atom atom
@@ -32,7 +33,9 @@ parseNumber :: P.Parser Primitive
 parseNumber = Number . read <$> P.many1 P.digit
 
 parseList :: P.Parser Primitive
-parseList = List <$> P.sepBy parseExpression spaces
+parseList =
+    List <$> do
+        P.try (P.endBy parseExpression spaces) <|> P.sepBy parseExpression spaces
 
 parseDottedList :: P.Parser Primitive
 parseDottedList = do
@@ -54,6 +57,8 @@ parseExpression =
         <|> parseQuoted
         <|> do
             P.char '('
+            P.try P.spaces
             x <- P.try parseList <|> parseDottedList
+            P.try P.spaces
             P.char ')'
             return x
