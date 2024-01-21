@@ -8,19 +8,31 @@ Prerequisites:
 > Cabal
 
 How to Run:
-
+> This will take a filename as argument and interpret it.
 ```
 cabal run [projectname] [filename]
 ```
-This will take a filename as argument and interpret it.
-
+>Using cabal run with no arguments will just run the REPL.
 ```
 cabal run
 ```
-Using cabal run with no arguments will just run the REPL.
-
-Or
+>  Use the executable.
 ```
 cabal install --installdir=.
 ```
-And just use the executable.
+
+## Code Examples
+
+> Variable Declarations
+```scheme
+(define x 10)
+(define x "John")
+```
+> Function Declarations
+```scheme
+(define (add x y) (+ x y))
+```
+> Function Calls
+```scheme
+(add 1 2)
+```
